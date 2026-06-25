@@ -1,0 +1,8 @@
+{
+  "name": "travel-domain",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/travel/domain/src",
+  "targets": {},
+  "tags": ["scope:travel", "type:domain"]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "supabase-adapter",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/platform/supabase-adapter/src",
+  "targets": {},
+  "tags": ["scope:platform", "type:data-access"]
+}
