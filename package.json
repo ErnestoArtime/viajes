@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "ng serve portal --host 0.0.0.0",
-    "serve:portal": "ng serve portal --host 0.0.0.0",
-    "build": "ng build portal",
-    "build:portal": "ng build portal",
+    "start": "nx serve portal --host 0.0.0.0",
+    "serve:portal": "nx serve portal --host 0.0.0.0",
+    "build": "nx build portal",
+    "build:portal": "nx build portal",
     "nx:graph": "nx graph"
   },
   "private": true,

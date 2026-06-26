@@ -58,3 +58,17 @@ validacion minima de configuracion. La siguiente fase natural es agregar:
 - autenticacion por gestores/agencias
 - storage para imagenes de propiedades
 - reglas RLS por `tenant_id`
+
+## Ingesta de datos externos
+
+El proyecto esta preparado para poblar hoteles desde fuentes externas como
+Havanatur, Cubatur u otros catalogos, pero siempre como borradores revisables.
+No se deben copiar fotos o descripciones de terceros como contenido propio.
+
+El flujo recomendado esta en `tools/importers/hotels/README.md`:
+
+- importar datos factuales con `sourceName`, `sourceUrl` y `licenseStatus`
+- conservar texto crudo solo para revision interna
+- reescribir descripciones con contenido propio
+- usar fotos propias, autorizadas, abiertas o placeholders
+- aprobar manualmente antes de publicar o sincronizar con Supabase
