@@ -1,4 +1,15 @@
 export type ListingCategory = 'hotel' | 'hostal' | 'villa' | 'experience' | 'transport';
+export type SourceName = 'havanatur' | 'cubatur' | 'gaviota' | 'melia' | 'iberostar' | 'osm' | 'wikimedia' | 'manual' | 'demo';
+export type LicenseStatus = 'unknown' | 'allowed' | 'needs_permission' | 'open_license' | 'demo_only';
+export type ImportStatus = 'draft' | 'reviewed' | 'approved' | 'rejected';
+
+export interface ListingSource {
+  sourceName: SourceName;
+  sourceUrl?: string;
+  licenseStatus: LicenseStatus;
+  lastCheckedAt?: string;
+  attribution?: string;
+}
 
 export interface TravelListing {
   id: string;
@@ -17,6 +28,37 @@ export interface TravelListing {
   amenities: string[];
   manager: string;
   availabilityLabel: string;
+  source: ListingSource;
+}
+
+export interface ImportedImage {
+  url: string;
+  sourceUrl: string;
+  author?: string;
+  license?: string;
+  canUsePublicly: boolean;
+}
+
+export interface ImportedHotelDraft {
+  externalId: string;
+  sourceName: SourceName;
+  sourceUrl: string;
+  name: string;
+  province: string;
+  municipality?: string;
+  address?: string;
+  category: Extract<ListingCategory, 'hotel' | 'hostal' | 'villa'>;
+  rawDescription?: string;
+  rewrittenDescription: string;
+  amenities: string[];
+  images: ImportedImage[];
+  rating?: number;
+  reviewCount?: number;
+  nightlyPrice?: number;
+  currency?: 'USD' | 'CUP' | 'EUR';
+  importStatus: ImportStatus;
+  licenseStatus: LicenseStatus;
+  lastCheckedAt: string;
 }
 
 export interface ServicePackage {
@@ -53,7 +95,12 @@ export const travelListings: TravelListing[] = [
     tags: ['Centro historico', 'WiFi', 'Desayuno'],
     amenities: ['Reserva instantanea', 'Traslado aeropuerto', 'Recepcion 24h'],
     manager: 'Gestor Habana Azul',
-    availabilityLabel: '8 habitaciones esta semana'
+    availabilityLabel: '8 habitaciones esta semana',
+    source: {
+      sourceName: 'demo',
+      licenseStatus: 'demo_only',
+      attribution: 'Demo con imagen externa de Unsplash para prototipo'
+    }
   },
   {
     id: 'trinidad-hostal-02',
@@ -71,7 +118,12 @@ export const travelListings: TravelListing[] = [
     tags: ['Familias', 'Patio', 'Cena criolla'],
     amenities: ['Pago flexible', 'Guia local', 'Check-in temprano'],
     manager: 'Red Trinidad Viva',
-    availabilityLabel: '3 habitaciones libres'
+    availabilityLabel: '3 habitaciones libres',
+    source: {
+      sourceName: 'demo',
+      licenseStatus: 'demo_only',
+      attribution: 'Demo con imagen externa de Unsplash para prototipo'
+    }
   },
   {
     id: 'vinales-villa-03',
@@ -89,7 +141,12 @@ export const travelListings: TravelListing[] = [
     tags: ['Naturaleza', 'Piscina', 'Rutas'],
     amenities: ['Experiencias incluidas', 'Cocina privada', 'Parqueo'],
     manager: 'Operador Vinales Norte',
-    availabilityLabel: 'Calendario abierto'
+    availabilityLabel: 'Calendario abierto',
+    source: {
+      sourceName: 'demo',
+      licenseStatus: 'demo_only',
+      attribution: 'Demo con imagen externa de Unsplash para prototipo'
+    }
   },
   {
     id: 'varadero-resort-04',
@@ -107,7 +164,12 @@ export const travelListings: TravelListing[] = [
     tags: ['Playa', 'Todo incluido', 'Familias'],
     amenities: ['Motor de ofertas', 'Inventario por cupos', 'Actividades nauticas'],
     manager: 'Comercial Varadero Plus',
-    availabilityLabel: 'Promocion activa'
+    availabilityLabel: 'Promocion activa',
+    source: {
+      sourceName: 'demo',
+      licenseStatus: 'demo_only',
+      attribution: 'Demo con imagen externa de Unsplash para prototipo'
+    }
   }
 ];
 
