@@ -1,217 +1,123 @@
 <ion-app>
-  <ion-header class="app-header">
-    <ion-toolbar>
-      <ion-title>
-        <span class="brand-mark">VC</span>
-        <span>{{ tenant.productName }}</span>
-      </ion-title>
-      <ion-buttons slot="end">
-        <ion-button fill="clear" href="#catalogo">Catalogo</ion-button>
-        <ion-button fill="clear" href="#gestion">Gestion</ion-button>
-        <ion-button color="secondary" fill="solid" href="mailto:{{ tenant.contactEmail }}">
-          Comercializar
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
+  <ion-menu contentId="main-content">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>{{ tenant.productName }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
+        <ion-item button routerLink="/home" detail>
+          <ion-icon name="home-outline" slot="start"></ion-icon>
+          <ion-label>Inicio</ion-label>
+        </ion-item>
 
-  <ion-content fullscreen="true">
-    <main class="shell">
-      <section class="hero-section">
-        <div class="hero-copy">
-          <ion-badge color="secondary">Producto multi-cliente para turismo</ion-badge>
-          <h1>Reserva y vende alojamientos, servicios y experiencias en Cuba.</h1>
-          <p>
-            Una base Ionic Angular preparada para web, PWA, Android e iOS, con catalogo
-            comercial, gestion por operadores y arquitectura lista para conectar Supabase.
-          </p>
-          <div class="hero-actions">
-            <ion-button size="large" color="primary" href="#catalogo">
-              <ion-icon slot="start" name="search-outline"></ion-icon>
-              Explorar inventario
-            </ion-button>
-            <ion-button size="large" fill="outline" color="tertiary" href="#gestion">
-              <ion-icon slot="start" name="construct-outline"></ion-icon>
-              Ver gestion
-            </ion-button>
-          </div>
-        </div>
+        <ion-item-divider>
+          <ion-label>Funcionalidades</ion-label>
+        </ion-item-divider>
 
-        <aside class="booking-panel" aria-label="Busqueda de disponibilidad">
-          <div class="panel-heading">
-            <span>Busqueda rapida</span>
-            <ion-chip color="primary">
-              <ion-icon name="calendar-outline"></ion-icon>
-              <ion-label>Junio 2026</ion-label>
-            </ion-chip>
-          </div>
-
-          <label>
-            Destino o servicio
-            <input [(ngModel)]="searchTerm" type="search" placeholder="Habana, hostal, playa...">
-          </label>
-
-          <div class="field-grid">
-            <label>
-              Provincia
-              <select [(ngModel)]="province">
-                @for (item of provinces; track item) {
-                  <option [value]="item">{{ item }}</option>
-                }
-              </select>
-            </label>
-            <label>
-              Personas
-              <input [(ngModel)]="guests" min="1" max="8" type="number">
-            </label>
-          </div>
-
-          <div class="availability-card">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <div>
-              <strong>{{ filteredListings().length }} opciones disponibles</strong>
-              <span>Con tarifas, cupos y gestores preparados para reserva.</span>
-            </div>
-          </div>
-        </aside>
-      </section>
-
-      <section class="metric-strip" aria-label="Indicadores comerciales">
-        @for (metric of metrics; track metric.label) {
-          <article>
-            <span>{{ metric.label }}</span>
-            <strong>{{ metric.value }}</strong>
-            <small>{{ metric.trend }}</small>
-          </article>
+        @if (features().booking.enabled) {
+          <ion-item button routerLink="/features/booking" detail>
+            <ion-icon name="cart-outline" slot="start"></ion-icon>
+            <ion-label>Reservas y Pagos</ion-label>
+          </ion-item>
         }
-      </section>
 
-      <section id="catalogo" class="section-block">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">Catalogo vendible</span>
-            <h2>Inventario inicial para hoteles, hostales y servicios.</h2>
-          </div>
-          <ion-segment [value]="selectedCategory()" (ionChange)="updateCategory($event.detail.value)">
-            @for (category of categories; track category) {
-              <ion-segment-button [value]="category">
-                <ion-label>{{ categoryLabels[category] }}</ion-label>
-              </ion-segment-button>
-            }
-          </ion-segment>
-        </div>
+        @if (features().operatorDashboard.enabled) {
+          <ion-item button routerLink="/features/dashboard" detail>
+            <ion-icon name="analytics-outline" slot="start"></ion-icon>
+            <ion-label>Panel Operativo</ion-label>
+          </ion-item>
+        }
 
-        <div class="listing-grid">
-          @for (listing of filteredListings(); track trackListing($index, listing)) {
-            <article class="listing-card">
-              <img [src]="listing.imageUrl" [alt]="listing.name">
-              <div class="listing-body">
-                <div class="listing-meta">
-                  <ion-badge>{{ categoryLabels[listing.category] }}</ion-badge>
-                  <span><ion-icon name="star"></ion-icon>{{ listing.rating }} ({{ listing.reviewCount }})</span>
-                </div>
-                <h3>{{ listing.name }}</h3>
-                <p>{{ listing.shortDescription }}</p>
-                <div class="location">
-                  <ion-icon name="location-outline"></ion-icon>
-                  {{ listing.location }}, {{ listing.province }}
-                </div>
-                <div class="tag-row">
-                  @for (tag of listing.tags; track tag) {
-                    <span>{{ tag }}</span>
-                  }
-                </div>
-                <div class="listing-footer">
-                  <div>
-                    <strong>{{ listing.nightlyPrice }} {{ listing.currency }}</strong>
-                    <small>por noche</small>
-                  </div>
-                  <ion-button fill="clear" color="primary">
-                    Reservar
-                    <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
-                  </ion-button>
-                </div>
-              </div>
-            </article>
-          } @empty {
-            <div class="empty-state">
-              <ion-icon name="search-outline"></ion-icon>
-              <strong>No hay resultados con esos filtros.</strong>
-              <span>Ajusta provincia, categoria o cantidad de personas.</span>
-            </div>
-          }
-        </div>
-      </section>
+        @if (features().travelerExperience.enabled) {
+          <ion-item button routerLink="/features/experience" detail>
+            <ion-icon name="compass-outline" slot="start"></ion-icon>
+            <ion-label>Experiencias</ion-label>
+          </ion-item>
+        }
 
-      <section class="section-block package-band">
-        <div class="section-heading compact">
-          <div>
-            <span class="eyebrow">Comercializacion</span>
-            <h2>Paquetes y servicios que suben el ticket promedio.</h2>
-          </div>
-        </div>
+        @if (features().multiLanguage.enabled || features().multiCurrency.enabled) {
+          <ion-item button routerLink="/features/localization" detail>
+            <ion-icon name="globe-outline" slot="start"></ion-icon>
+            <ion-label>Multi-idioma/Moneda</ion-label>
+          </ion-item>
+        }
 
-        <div class="package-grid">
-          @for (item of packages; track item.id) {
-            <article class="package-card" [class]="'accent-' + item.accent">
-              <span>{{ item.duration }}</span>
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.description }}</p>
-              <ul>
-                @for (include of item.includes; track include) {
-                  <li>
-                    <ion-icon name="checkmark-circle-outline"></ion-icon>
-                    {{ include }}
-                  </li>
-                }
-              </ul>
-              <strong>Desde {{ item.priceFrom }} {{ item.currency }}</strong>
-            </article>
-          }
-        </div>
-      </section>
+        @if (features().loyalty.enabled) {
+          <ion-item button routerLink="/features/loyalty" detail>
+            <ion-icon name="trophy-outline" slot="start"></ion-icon>
+            <ion-label>Fidelizacion</ion-label>
+          </ion-item>
+        }
 
-      <section id="gestion" class="management-grid">
-        <div class="section-heading vertical">
-          <span class="eyebrow">Gestionable y personalizable</span>
-          <h2>Listo para vender como producto a gestores de turismo.</h2>
-          <p>
-            La capa de tenant permite cambiar marca, modulos, reglas comerciales y comisiones
-            sin tocar el nucleo del dominio. Supabase entrara como adaptador de datos.
-          </p>
-        </div>
+        @if (features().integrations.googleMaps || features().integrations.whatsappBusiness || features().integrations.googleAnalytics || features().integrations.pushNotifications) {
+          <ion-item button routerLink="/features/integrations" detail>
+            <ion-icon name="settings-outline" slot="start"></ion-icon>
+            <ion-label>Integraciones</ion-label>
+          </ion-item>
+        }
 
-        <div class="ops-panel">
-          <article>
-            <ion-icon name="storefront-outline"></ion-icon>
-            <div>
-              <strong>Multi-tenant</strong>
-              <span>Marca, contacto, modulos y reglas por cliente.</span>
-            </div>
-          </article>
-          <article>
-            <ion-icon name="bed-outline"></ion-icon>
-            <div>
-              <strong>Inventario turistico</strong>
-              <span>Hoteles, hostales, villas, experiencias y transporte.</span>
-            </div>
-          </article>
-          <article>
-            <ion-icon name="analytics-outline"></ion-icon>
-            <div>
-              <strong>Panel operativo</strong>
-              <span>Ocupacion, ventas, disponibilidad, comisiones y vouchers.</span>
-            </div>
-          </article>
-          <article>
-            <ion-icon name="color-palette-outline"></ion-icon>
-            <div>
-              <strong>White label</strong>
-              <span>Colores, textos, dominios y catalogo por agencia o gestor.</span>
-            </div>
-          </article>
-        </div>
-      </section>
-    </main>
-  </ion-content>
+        @if (features().auth.enabled) {
+          <ion-item button routerLink="/features/auth" detail>
+            <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+            <ion-label>Autenticacion</ion-label>
+          </ion-item>
+        }
+
+        @if (features().transport.enabled) {
+          <ion-item button routerLink="/features/transport" detail>
+            <ion-icon name="car-outline" slot="start"></ion-icon>
+            <ion-label>Transporte</ion-label>
+          </ion-item>
+        }
+
+        @if (features().content.enabled) {
+          <ion-item button routerLink="/features/content" detail>
+            <ion-icon name="document-text-outline" slot="start"></ion-icon>
+            <ion-label>Contenido</ion-label>
+          </ion-item>
+        }
+
+        @if (features().analytics.enabled) {
+          <ion-item button routerLink="/features/analytics" detail>
+            <ion-icon name="pulse-outline" slot="start"></ion-icon>
+            <ion-label>Analytics</ion-label>
+          </ion-item>
+        }
+
+        <ion-item-divider>
+          <ion-label>Administracion</ion-label>
+        </ion-item-divider>
+
+        <ion-item button routerLink="/admin/features" detail>
+          <ion-icon name="settings-outline" slot="start"></ion-icon>
+          <ion-label>Gestionar Funcionalidades</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    <ion-header class="app-header">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>
+          <span class="brand-mark">VC</span>
+          <span>{{ tenant.productName }}</span>
+        </ion-title>
+        <ion-buttons slot="end">
+          <ion-button fill="clear" routerLink="/home" fragment="catalogo">Catalogo</ion-button>
+          <ion-button fill="clear" routerLink="/home" fragment="gestion">Gestion</ion-button>
+          <ion-button color="secondary" fill="solid" href="mailto:{{ tenant.contactEmail }}">
+            Comercializar
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-router-outlet></ion-router-outlet>
+  </div>
 </ion-app>
