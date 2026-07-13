@@ -24,7 +24,7 @@ export interface SubmittedQuoteRequest {
 export class QuoteRequestRepository {
   private readonly client = getSupabaseClient();
 
-  async submit(draft: QuoteRequestDraft, idempotencyKey = crypto.randomUUID()): Promise<SubmittedQuoteRequest> {
+  async submit(draft: QuoteRequestDraft, idempotencyKey: string = crypto.randomUUID()): Promise<SubmittedQuoteRequest> {
     if (!this.client) {
       throw new SupabaseConfigurationError();
     }

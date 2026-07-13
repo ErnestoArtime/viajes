@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonBadge, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
+import { IonBadge, IonButton, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonTextarea, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { refreshOutline } from 'ionicons/icons';
 
@@ -20,7 +21,7 @@ const statusLabels: Record<QuoteRequestStatus, string> = {
 @Component({
   selector: 'viajes-operator-requests',
   standalone: true,
-  imports: [CommonModule, IonBadge, IonButton, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonTitle, IonToolbar],
+  imports: [CommonModule, FormsModule, IonBadge, IonButton, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonSelect, IonSelectOption, IonTextarea, IonTitle, IonToolbar],
   template: `
     <ion-header><ion-toolbar><ion-title>Solicitudes de viaje</ion-title><ion-button slot="end" fill="clear" aria-label="Actualizar solicitudes" (click)="load()"><ion-icon name="refresh-outline"></ion-icon></ion-button></ion-toolbar></ion-header>
     <ion-content class="ion-padding">
@@ -37,13 +38,22 @@ const statusLabels: Record<QuoteRequestStatus, string> = {
               @if (request.notes) { <p>{{ request.notes }}</p> }
             </ion-label>
             @if (request.status === 'submitted') { <ion-button slot="end" size="small" (click)="moveToReview(request)">Revisar</ion-button> }
-            @if (request.status === 'reviewing') { <ion-button slot="end" size="small" (click)="markQuoted(request)">Marcar cotizada</ion-button> }
+            @if (request.status === 'reviewing') { <ion-button slot="end" size="small" (click)="prepareQuote(request)">Preparar cotizacion</ion-button> }
           </ion-item>
+          @if (quoteRequestId() === request.id) {
+            <section class="quote-editor" aria-label="Crear cotizacion">
+              <ion-input type="number" min="0" label="Importe" labelPlacement="stacked" [ngModel]="quoteAmount()" (ngModelChange)="quoteAmount.set(positiveAmount($event))"></ion-input>
+              <ion-select label="Moneda" labelPlacement="stacked" [ngModel]="quoteCurrency()" (ngModelChange)="quoteCurrency.set($event)"><ion-select-option value="USD">USD</ion-select-option><ion-select-option value="CUP">CUP</ion-select-option><ion-select-option value="EUR">EUR</ion-select-option></ion-select>
+              <ion-input type="datetime-local" label="Vigencia" labelPlacement="stacked" [ngModel]="quoteExpiresAt()" (ngModelChange)="quoteExpiresAt.set($event)"></ion-input>
+              <ion-textarea label="Condiciones" labelPlacement="stacked" [ngModel]="quoteConditions()" (ngModelChange)="quoteConditions.set($event)"></ion-textarea>
+              <ion-button [disabled]="quoteAmount() < 0 || !quoteExpiresAt()" (click)="createQuote(request)">Enviar cotizacion</ion-button>
+            </section>
+          }
         }
       </ion-list>
     </ion-content>
   `,
-  styles: ['.error { color: var(--ion-color-danger); } .empty { color: var(--ion-color-medium); padding: 2rem 0; } ion-badge { margin-left: .5rem; }'],
+  styles: ['.error { color: var(--ion-color-danger); } .empty { color: var(--ion-color-medium); padding: 2rem 0; } ion-badge { margin-left: .5rem; } .quote-editor { display: grid; gap: 12px; margin: 0 16px 18px; padding: 16px; border: 1px solid var(--ion-color-light-shade); border-radius: 8px; }'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OperatorRequestsComponent {
@@ -52,6 +62,11 @@ export class OperatorRequestsComponent {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly statusLabels = statusLabels;
+  protected readonly quoteRequestId = signal<string | null>(null);
+  protected readonly quoteAmount = signal(0);
+  protected readonly quoteCurrency = signal<'USD' | 'CUP' | 'EUR'>('USD');
+  protected readonly quoteExpiresAt = signal('');
+  protected readonly quoteConditions = signal('');
 
   constructor() {
     addIcons({ refreshOutline });
@@ -74,8 +89,37 @@ export class OperatorRequestsComponent {
     await this.transition(request, 'reviewing');
   }
 
-  async markQuoted(request: OperatorQuoteRequest): Promise<void> {
-    await this.transition(request, 'quoted');
+  protected prepareQuote(request: OperatorQuoteRequest): void {
+    this.quoteRequestId.set(request.id);
+    this.quoteAmount.set(0);
+    this.quoteCurrency.set('USD');
+    this.quoteExpiresAt.set('');
+    this.quoteConditions.set('');
+  }
+
+  protected positiveAmount(value: number | string): number {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? Math.max(0, amount) : 0;
+  }
+
+  protected async createQuote(request: OperatorQuoteRequest): Promise<void> {
+    const expiresAt = new Date(this.quoteExpiresAt());
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+      this.error.set('Indica una fecha de vigencia futura.');
+      return;
+    }
+    try {
+      await this.repository.createQuote(request.id, {
+        amount: this.quoteAmount(),
+        currency: this.quoteCurrency(),
+        expiresAt: expiresAt.toISOString(),
+        conditions: this.quoteConditions().trim() || undefined
+      });
+      this.quoteRequestId.set(null);
+      await this.load();
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'No se pudo crear la cotizacion.');
+    }
   }
 
   protected statusColor(status: QuoteRequestStatus): string {

@@ -8,14 +8,18 @@ export interface QuoteRequestValidationItem {
 export function canSubmitQuoteRequest(
   items: QuoteRequestValidationItem[],
   contactName: string,
-  contactEmail: string
+  contactEmail: string,
+  today = new Date().toISOString().slice(0, 10)
 ): boolean {
-  if (!items.length || !contactName.trim() || !contactEmail.trim()) {
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim());
+
+  if (!items.length || !contactName.trim() || !validEmail) {
     return false;
   }
 
   const [first] = items;
   return items.every((item) =>
+    item.checkIn >= today &&
     item.checkIn < item.checkOut &&
     item.guests > 0 &&
     item.guests <= item.capacity &&

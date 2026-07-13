@@ -4,14 +4,14 @@
       <div class="menu-brand"><span class="brand-mark" [style.background]="tenant().branding.primaryColor">VC</span><div><strong>{{ tenant().branding.productName }}</strong><span>Tu viaje por Cuba</span></div></div>
       <nav aria-label="Navegacion principal">
         <span class="menu-label">Descubrir</span>
-        <ion-item button routerLink="/" detail="false"><ion-icon name="home-outline" slot="start"></ion-icon><ion-label><strong>Inicio</strong><span>Inspirate y planifica</span></ion-label></ion-item>
-        <ion-item button routerLink="/buscar" detail="false"><ion-icon name="search-outline" slot="start"></ion-icon><ion-label><strong>Buscar</strong><span>Alojamientos y servicios</span></ion-label></ion-item>
-        <ion-item button routerLink="/destinos" detail="false"><ion-icon name="map-outline" slot="start"></ion-icon><ion-label><strong>Destinos</strong><span>Lugares para vivir</span></ion-label></ion-item>
-        <ion-item button routerLink="/experiencias" detail="false"><ion-icon name="compass-outline" slot="start"></ion-icon><ion-label><strong>Experiencias</strong><span>Momentos locales</span></ion-label></ion-item>
+        <ion-item button routerLink="/" detail="false" (click)="closeMenu()"><ion-icon name="home-outline" slot="start"></ion-icon><ion-label><strong>Inicio</strong><span>Inspirate y planifica</span></ion-label></ion-item>
+        <ion-item button routerLink="/buscar" detail="false" (click)="closeMenu()"><ion-icon name="search-outline" slot="start"></ion-icon><ion-label><strong>Buscar</strong><span>Alojamientos y servicios</span></ion-label></ion-item>
+        <ion-item button routerLink="/destinos" detail="false" (click)="closeMenu()"><ion-icon name="map-outline" slot="start"></ion-icon><ion-label><strong>Destinos</strong><span>Lugares para vivir</span></ion-label></ion-item>
+        <ion-item button routerLink="/experiencias" detail="false" (click)="closeMenu()"><ion-icon name="compass-outline" slot="start"></ion-icon><ion-label><strong>Experiencias</strong><span>Momentos locales</span></ion-label></ion-item>
         <span class="menu-label">Tu viaje</span>
-        <ion-item button routerLink="/viajes" detail="false"><ion-icon name="heart-outline" slot="start"></ion-icon><ion-label><strong>Guardados y viajes</strong><span>Favoritos, carrito e itinerario</span></ion-label></ion-item>
+        <ion-item button routerLink="/viajes" detail="false" (click)="closeMenu()"><ion-icon name="heart-outline" slot="start"></ion-icon><ion-label><strong>Guardados y viajes</strong><span>Favoritos, carrito e itinerario</span></ion-label></ion-item>
       </nav>
-      <a class="provider-callout" routerLink="/operator"><span>Eres proveedor?</span><strong>Gestiona tu inventario</strong><ion-icon name="arrow-forward-outline"></ion-icon></a>
+      <a class="provider-callout" routerLink="/operator" (click)="closeMenu()"><span>Eres proveedor?</span><strong>Gestiona tu inventario</strong><ion-icon name="arrow-forward-outline"></ion-icon></a>
     </ion-content>
   </ion-menu>
 

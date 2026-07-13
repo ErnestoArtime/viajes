@@ -20,6 +20,13 @@ export interface OperatorQuoteRequest {
   createdAt: string;
 }
 
+export interface CreateQuoteDraft {
+  amount: number;
+  currency: 'USD' | 'CUP' | 'EUR';
+  expiresAt: string;
+  conditions?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OperatorRequestsRepository {
   private readonly client = getSupabaseClient();
@@ -62,6 +69,22 @@ export class OperatorRequestsRepository {
       p_quote_request_id: id,
       p_to_status: status,
       p_note: note ?? null
+    });
+    if (error) {
+      throw error;
+    }
+  }
+
+  async createQuote(id: string, draft: CreateQuoteDraft): Promise<void> {
+    if (!this.client) {
+      throw new SupabaseConfigurationError();
+    }
+    const { error } = await this.client.rpc('create_quote', {
+      p_quote_request_id: id,
+      p_amount: draft.amount,
+      p_currency: draft.currency,
+      p_expires_at: draft.expiresAt,
+      p_conditions: draft.conditions ?? null
     });
     if (error) {
       throw error;
