@@ -1,13 +1,13 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonChip,
   IonContent,
   IonDatetime,
   IonHeader,
@@ -16,6 +16,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonTextarea,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
@@ -23,29 +24,17 @@ import { addIcons } from 'ionicons';
 import {
   cartOutline,
   checkmarkCircleOutline,
-  cardOutline,
-  cashOutline,
   timeOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
 import { FeatureFlagsService } from '@viajes/tenant-config';
 import { TravelListing } from '@viajes/domain';
 
-interface BookingItem {
-  listing: TravelListing;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-  nights: number;
-  totalPrice: number;
-}
+import { BookingDraftItem, BookingDraftService } from '../../core/services/booking-draft.service';
+import { QuoteRequestRepository } from '../../core/services/quote-request.repository';
+import { canSubmitQuoteRequest } from '../../core/utils/quote-request.validation';
 
-interface PaymentMethod {
-  id: string;
-  name: string;
-  icon: string;
-  available: boolean;
-}
+type BookingItem = BookingDraftItem;
 
 @Component({
   selector: 'viajes-booking',
@@ -53,12 +42,12 @@ interface PaymentMethod {
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     IonButton,
     IonCard,
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonChip,
     IonContent,
     IonDatetime,
     IonHeader,
@@ -67,6 +56,7 @@ interface PaymentMethod {
     IonItem,
     IonLabel,
     IonList,
+    IonTextarea,
     IonTitle,
     IonToolbar
   ],
@@ -87,11 +77,12 @@ interface PaymentMethod {
             <ion-icon name="cart-outline"></ion-icon>
             <h3>Tu carrito esta vacio</h3>
             <p>Explora nuestro catalogo y agrega alojamientos o servicios.</p>
+            <ion-button routerLink="/home" fragment="catalogo">Volver al catalogo</ion-button>
           </div>
         } @else {
           <div class="booking-layout">
             <div class="cart-section">
-              <h2>Carrito de Reservas ({{ cartItems().length }})</h2>
+                  <h2>Solicitud de viaje ({{ cartItems().length }})</h2>
               
               <ion-list>
                 @for (item of cartItems(); track item.listing.id) {
@@ -137,7 +128,7 @@ interface PaymentMethod {
                         
                         <div class="price-summary">
                           <span>{{ item.nights }} noches x {{ item.listing.nightlyPrice }} {{ item.listing.currency }}</span>
-                          <strong>{{ item.totalPrice }} {{ item.listing.currency }}</strong>
+                          <strong>{{ item.listing.nightlyPrice * item.nights }} {{ item.listing.currency }}</strong>
                         </div>
                         
                         <ion-button 
@@ -159,33 +150,27 @@ interface PaymentMethod {
                   <ion-card-title>Resumen de Pago</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
-                  <div class="summary-row">
-                    <span>Subtotal</span>
-                    <strong>{{ totalAmount() }} USD</strong>
-                  </div>
-                  <div class="summary-row">
-                    <span>Impuestos (10%)</span>
-                    <strong>{{ taxAmount() }} USD</strong>
-                  </div>
                   <div class="summary-row total">
-                    <span>Total</span>
-                    <strong>{{ totalWithTax() }} USD</strong>
+                    <span>Estimacion inicial</span>
+                    <strong>Desde {{ totalAmount() }} USD</strong>
                   </div>
 
-                  <h4>Metodo de Pago</h4>
+                  <p class="estimate-note">Importe estimado. El operador confirmara disponibilidad, precio final y deposito.</p>
+
+                  <h4>Datos de contacto</h4>
                   <ion-list>
-                    @for (method of paymentMethods(); track method.id) {
-                      <ion-item 
-                        [class.selected]="selectedPayment() === method.id"
-                        (click)="selectPayment(method.id)"
-                        [disabled]="!method.available">
-                        <ion-icon [name]="method.icon" slot="start"></ion-icon>
-                        <ion-label>{{ method.name }}</ion-label>
-                        @if (!method.available) {
-                          <ion-chip color="medium">No disponible</ion-chip>
-                        }
-                      </ion-item>
-                    }
+                    <ion-item>
+                      <ion-input label="Nombre completo" labelPlacement="stacked" [(ngModel)]="contactName" autocomplete="name" required></ion-input>
+                    </ion-item>
+                    <ion-item>
+                      <ion-input label="Email" labelPlacement="stacked" type="email" [(ngModel)]="contactEmail" autocomplete="email" required></ion-input>
+                    </ion-item>
+                    <ion-item>
+                      <ion-input label="Telefono o WhatsApp" labelPlacement="stacked" type="tel" [(ngModel)]="contactPhone" autocomplete="tel"></ion-input>
+                    </ion-item>
+                    <ion-item>
+                      <ion-textarea label="Comentarios" labelPlacement="stacked" [(ngModel)]="notes"></ion-textarea>
+                    </ion-item>
                   </ion-list>
 
                   <div class="policy-info">
@@ -199,11 +184,17 @@ interface PaymentMethod {
                   <ion-button 
                     expand="block" 
                     size="large"
-                    [disabled]="!canProceed()"
+                    [disabled]="!canProceed() || isSubmitting()"
                     (click)="processBooking()">
                     <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-                    Confirmar Reserva
+                    {{ isSubmitting() ? 'Enviando solicitud...' : 'Solicitar cotizacion' }}
                   </ion-button>
+                  @if (submissionError()) {
+                    <p class="submission-message error" role="alert">{{ submissionError() }}</p>
+                  }
+                  @if (submissionReference()) {
+                    <p class="submission-message success" aria-live="polite">Solicitud enviada. Referencia: {{ submissionReference() }}</p>
+                  }
                 </ion-card-content>
               </ion-card>
             </div>
@@ -294,6 +285,15 @@ interface PaymentMethod {
       margin: 0;
       font-size: 0.9rem;
     }
+
+    .estimate-note {
+      color: var(--ion-color-medium-shade);
+      font-size: 0.9rem;
+    }
+
+    .submission-message { margin: 1rem 0 0; }
+    .submission-message.error { color: var(--ion-color-danger); }
+    .submission-message.success { color: var(--ion-color-success-shade); }
     
     ion-item.selected {
       --background: var(--ion-color-primary-tint);
@@ -302,33 +302,23 @@ interface PaymentMethod {
 })
 export class BookingComponent {
   private readonly featureFlagsService = inject(FeatureFlagsService);
+  private readonly bookingDraft = inject(BookingDraftService);
+  private readonly quoteRequests = inject(QuoteRequestRepository);
   
   protected readonly featureFlags = this.featureFlagsService.flags;
   
-  protected readonly cartItems = signal<BookingItem[]>([]);
-  protected readonly selectedPayment = signal<string>('paypal');
+  protected readonly cartItems = this.bookingDraft.items;
+  protected readonly isSubmitting = signal(false);
+  protected readonly submissionError = signal<string | null>(null);
+  protected readonly submissionReference = signal<string | null>(null);
   protected readonly minDate = new Date().toISOString().split('T')[0];
-
-  protected readonly paymentMethods = computed<PaymentMethod[]>(() => {
-    const gateway = this.featureFlags().booking.paymentGateway;
-    return [
-      { id: 'paypal', name: 'PayPal', icon: 'card-outline', available: gateway === 'paypal' || gateway === 'none' },
-      { id: 'stripe', name: 'Tarjeta de Credito/Debito', icon: 'card-outline', available: gateway === 'stripe' },
-      { id: 'transfer', name: 'Transferencia Bancaria', icon: 'cash-outline', available: gateway === 'transfer' },
-      { id: 'crypto', name: 'Criptomonedas', icon: 'cash-outline', available: gateway === 'crypto' }
-    ];
-  });
+  protected contactName = '';
+  protected contactEmail = '';
+  protected contactPhone = '';
+  protected notes = '';
 
   protected readonly totalAmount = computed(() => {
-    return this.cartItems().reduce((sum, item) => sum + item.totalPrice, 0);
-  });
-
-  protected readonly taxAmount = computed(() => {
-    return this.totalAmount() * 0.1;
-  });
-
-  protected readonly totalWithTax = computed(() => {
-    return this.totalAmount() + this.taxAmount();
+    return this.cartItems().reduce((sum, item) => sum + item.listing.nightlyPrice * item.nights, 0);
   });
 
   protected readonly policyLabel = computed(() => {
@@ -351,33 +341,17 @@ export class BookingComponent {
     addIcons({
       cartOutline,
       checkmarkCircleOutline,
-      cardOutline,
-      cashOutline,
       timeOutline,
       shieldCheckmarkOutline
     });
   }
 
   addToCart(listing: TravelListing): void {
-    const checkIn = this.minDate;
-    const checkOut = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    const nights = 1;
-    
-    this.cartItems.update(items => [
-      ...items,
-      {
-        listing,
-        checkIn,
-        checkOut,
-        guests: 2,
-        nights,
-        totalPrice: listing.nightlyPrice * nights
-      }
-    ]);
+    this.bookingDraft.add(listing);
   }
 
   removeFromCart(listingId: string): void {
-    this.cartItems.update(items => items.filter(item => item.listing.id !== listingId));
+    this.bookingDraft.remove(listingId);
   }
 
   updateCheckIn(listingId: string, date: string): void {
@@ -391,58 +365,60 @@ export class BookingComponent {
   }
 
   updateGuests(listingId: string, guests: number): void {
-    this.updateCartItem(listingId, { guests });
-  }
-
-  selectPayment(methodId: string): void {
-    this.selectedPayment.set(methodId);
+    const item = this.cartItems().find((candidate) => candidate.listing.id === listingId);
+    if (item) {
+      this.updateCartItem(listingId, { guests: Math.min(item.listing.capacity, Math.max(1, guests)) });
+    }
   }
 
   canProceed(): boolean {
-    return this.cartItems().length > 0 && 
-           this.selectedPayment() !== '' &&
-           this.cartItems().every(item => item.checkIn && item.checkOut);
-  }
-
-  processBooking(): void {
-    if (!this.canProceed()) return;
-    
-    const booking = {
-      items: this.cartItems(),
-      paymentMethod: this.selectedPayment(),
-      total: this.totalWithTax(),
-      currency: 'USD',
-      timestamp: new Date().toISOString()
-    };
-    
-    console.log('Processing booking:', booking);
-    alert('Reserva procesada exitosamente!');
-    this.cartItems.set([]);
-  }
-
-  private updateCartItem(listingId: string, updates: Partial<BookingItem>): void {
-    this.cartItems.update(items =>
-      items.map(item =>
-        item.listing.id === listingId ? { ...item, ...updates } : item
-      )
+    return canSubmitQuoteRequest(
+      this.cartItems().map((item) => ({ ...item, capacity: item.listing.capacity })),
+      this.contactName,
+      this.contactEmail
     );
+  }
+
+  async processBooking(): Promise<void> {
+    if (!this.canProceed() || this.isSubmitting()) {
+      return;
+    }
+
+    const items = this.cartItems();
+    this.isSubmitting.set(true);
+    this.submissionError.set(null);
+    try {
+      const submitted = await this.quoteRequests.submit({
+        checkIn: items[0].checkIn,
+        checkOut: items[0].checkOut,
+        adults: items.reduce((total, item) => total + item.guests, 0),
+        children: 0,
+        rooms: items.length,
+        contactName: this.contactName.trim(),
+        contactEmail: this.contactEmail.trim(),
+        contactPhone: this.contactPhone.trim() || undefined,
+        notes: this.notes.trim() || undefined,
+        items: items.map((item) => ({ listingId: item.listing.id, quantity: 1 }))
+      });
+      this.submissionReference.set(submitted.reference);
+      this.bookingDraft.clear();
+    } catch (error) {
+      this.submissionError.set(error instanceof Error ? error.message : 'No se pudo enviar la solicitud.');
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  private updateCartItem(listingId: string, updates: Partial<Omit<BookingItem, 'listing'>>): void {
+    this.bookingDraft.update(listingId, updates);
   }
 
   private recalculatePrice(listingId: string): void {
-    this.cartItems.update(items =>
-      items.map(item => {
-        if (item.listing.id === listingId && item.checkIn && item.checkOut) {
-          const nights = Math.max(1, Math.ceil(
-            (new Date(item.checkOut).getTime() - new Date(item.checkIn).getTime()) / 86400000
-          ));
-          return {
-            ...item,
-            nights,
-            totalPrice: item.listing.nightlyPrice * nights
-          };
-        }
-        return item;
-      })
-    );
+    const item = this.cartItems().find((candidate) => candidate.listing.id === listingId);
+    if (!item || !item.checkIn || !item.checkOut || item.checkOut <= item.checkIn) {
+      return;
+    }
+    const nights = Math.ceil((new Date(item.checkOut).getTime() - new Date(item.checkIn).getTime()) / 86_400_000);
+    this.bookingDraft.update(listingId, { nights });
   }
 }

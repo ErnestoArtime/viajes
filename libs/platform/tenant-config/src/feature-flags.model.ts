@@ -101,28 +101,28 @@ export const defaultFeatureFlags: FeatureFlags = {
     cancellationPolicy: 'flexible'
   },
   operatorDashboard: {
-    enabled: true,
-    realTimeMetrics: true,
-    inventoryManagement: true,
-    calendarView: true
+    enabled: false,
+    realTimeMetrics: false,
+    inventoryManagement: false,
+    calendarView: false
   },
   travelerExperience: {
-    enabled: true,
-    itineraries: true,
+    enabled: false,
+    itineraries: false,
     offlineGuide: false,
-    chatWithHosts: true,
-    verifiedReviews: true
+    chatWithHosts: false,
+    verifiedReviews: false
   },
   multiLanguage: {
-    enabled: true,
+    enabled: false,
     languages: ['es', 'en', 'fr'],
     defaultLanguage: 'es'
   },
   multiCurrency: {
-    enabled: true,
+    enabled: false,
     currencies: ['USD', 'CUP', 'EUR'],
     defaultCurrency: 'USD',
-    dynamicPricing: true
+    dynamicPricing: false
   },
   loyalty: {
     enabled: false,
@@ -131,10 +131,10 @@ export const defaultFeatureFlags: FeatureFlags = {
     travelerBadges: true
   },
   integrations: {
-    googleMaps: true,
+    googleMaps: false,
     whatsappBusiness: false,
-    googleAnalytics: true,
-    pushNotifications: true
+    googleAnalytics: false,
+    pushNotifications: false
   },
   auth: {
     enabled: true,
@@ -143,17 +143,17 @@ export const defaultFeatureFlags: FeatureFlags = {
     hostVerification: true
   },
   transport: {
-    enabled: true,
-    privateTaxi: true,
+    enabled: false,
+    privateTaxi: false,
     sharedTransport: false,
-    carRental: true,
-    airportTransfer: true
+    carRental: false,
+    airportTransfer: false
   },
   content: {
-    enabled: true,
-    blog: true,
+    enabled: false,
+    blog: false,
     virtualTours: false,
-    travelerTestimonials: true
+    travelerTestimonials: false
   },
   analytics: {
     enabled: false,

@@ -1,17 +1,12 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 import { FeatureFlags, defaultFeatureFlags } from './feature-flags.model';
-
-const STORAGE_KEY = 'viajes:cuba-demo:feature-flags';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FeatureFlagsService {
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly canPersist = isPlatformBrowser(this.platformId);
-  private readonly _flags = signal<FeatureFlags>(this.loadInitialFlags());
+  private readonly _flags = signal<FeatureFlags>(structuredClone(defaultFeatureFlags));
   
   readonly flags = this._flags.asReadonly();
   
@@ -47,7 +42,6 @@ export class FeatureFlagsService {
       ...current,
       ...flags
     }));
-    this.persistFlags();
   }
 
   updateBookingFlags(flags: Partial<FeatureFlags['booking']>): void {
@@ -55,7 +49,6 @@ export class FeatureFlagsService {
       ...current,
       booking: { ...current.booking, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateOperatorDashboardFlags(flags: Partial<FeatureFlags['operatorDashboard']>): void {
@@ -63,7 +56,6 @@ export class FeatureFlagsService {
       ...current,
       operatorDashboard: { ...current.operatorDashboard, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateTravelerExperienceFlags(flags: Partial<FeatureFlags['travelerExperience']>): void {
@@ -71,7 +63,6 @@ export class FeatureFlagsService {
       ...current,
       travelerExperience: { ...current.travelerExperience, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateMultiLanguageFlags(flags: Partial<FeatureFlags['multiLanguage']>): void {
@@ -79,7 +70,6 @@ export class FeatureFlagsService {
       ...current,
       multiLanguage: { ...current.multiLanguage, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateMultiCurrencyFlags(flags: Partial<FeatureFlags['multiCurrency']>): void {
@@ -87,7 +77,6 @@ export class FeatureFlagsService {
       ...current,
       multiCurrency: { ...current.multiCurrency, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateLoyaltyFlags(flags: Partial<FeatureFlags['loyalty']>): void {
@@ -95,7 +84,6 @@ export class FeatureFlagsService {
       ...current,
       loyalty: { ...current.loyalty, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateIntegrationsFlags(flags: Partial<FeatureFlags['integrations']>): void {
@@ -103,7 +91,6 @@ export class FeatureFlagsService {
       ...current,
       integrations: { ...current.integrations, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateAuthFlags(flags: Partial<FeatureFlags['auth']>): void {
@@ -111,7 +98,6 @@ export class FeatureFlagsService {
       ...current,
       auth: { ...current.auth, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateTransportFlags(flags: Partial<FeatureFlags['transport']>): void {
@@ -119,7 +105,6 @@ export class FeatureFlagsService {
       ...current,
       transport: { ...current.transport, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateContentFlags(flags: Partial<FeatureFlags['content']>): void {
@@ -127,7 +112,6 @@ export class FeatureFlagsService {
       ...current,
       content: { ...current.content, ...flags }
     }));
-    this.persistFlags();
   }
 
   updateAnalyticsFlags(flags: Partial<FeatureFlags['analytics']>): void {
@@ -135,52 +119,10 @@ export class FeatureFlagsService {
       ...current,
       analytics: { ...current.analytics, ...flags }
     }));
-    this.persistFlags();
   }
 
   resetFlags(): void {
     this._flags.set(structuredClone(defaultFeatureFlags));
-    this.persistFlags();
   }
 
-  private loadInitialFlags(): FeatureFlags {
-    if (!this.canPersist) {
-      return structuredClone(defaultFeatureFlags);
-    }
-
-    const rawFlags = localStorage.getItem(STORAGE_KEY);
-
-    if (!rawFlags) {
-      return structuredClone(defaultFeatureFlags);
-    }
-
-    try {
-      return this.mergeFeatureFlags(defaultFeatureFlags, JSON.parse(rawFlags) as Partial<FeatureFlags>);
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-      return structuredClone(defaultFeatureFlags);
-    }
-  }
-
-  private persistFlags(): void {
-    if (this.canPersist) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this._flags()));
-    }
-  }
-
-  private mergeFeatureFlags(defaults: FeatureFlags, saved: Partial<FeatureFlags>): FeatureFlags {
-    return {
-      booking: { ...defaults.booking, ...saved.booking },
-      operatorDashboard: { ...defaults.operatorDashboard, ...saved.operatorDashboard },
-      travelerExperience: { ...defaults.travelerExperience, ...saved.travelerExperience },
-      multiLanguage: { ...defaults.multiLanguage, ...saved.multiLanguage },
-      multiCurrency: { ...defaults.multiCurrency, ...saved.multiCurrency },
-      loyalty: { ...defaults.loyalty, ...saved.loyalty },
-      integrations: { ...defaults.integrations, ...saved.integrations },
-      auth: { ...defaults.auth, ...saved.auth },
-      transport: { ...defaults.transport, ...saved.transport },
-      content: { ...defaults.content, ...saved.content },
-      analytics: { ...defaults.analytics, ...saved.analytics }
-    };
-  }
 }
