@@ -254,7 +254,7 @@ export interface BookingMetric {
 
 export const travelListings: TravelListing[] = [
   {
-    id: 'habana-boutique-01',
+    id: '0f4d6a13-1a28-4ed1-9f79-ef6f2dcd2001',
     category: 'hotel',
     name: 'Hotel Prado Boutique',
     location: 'Paseo del Prado',
@@ -279,7 +279,7 @@ export const travelListings: TravelListing[] = [
     }
   },
   {
-    id: 'trinidad-hostal-02',
+    id: '0f4d6a13-1a28-4ed1-9f79-ef6f2dcd2002',
     category: 'hostal',
     name: 'Hostal Patio Colonial',
     location: 'Centro historico',
@@ -304,7 +304,7 @@ export const travelListings: TravelListing[] = [
     }
   },
   {
-    id: 'vinales-villa-03',
+    id: '0f4d6a13-1a28-4ed1-9f79-ef6f2dcd2003',
     category: 'villa',
     name: 'Villa Mogote Verde',
     location: 'Valle de Vinales',
@@ -329,7 +329,7 @@ export const travelListings: TravelListing[] = [
     }
   },
   {
-    id: 'varadero-resort-04',
+    id: '0f4d6a13-1a28-4ed1-9f79-ef6f2dcd2004',
     category: 'hotel',
     name: 'Costa Clara Resort',
     location: 'Primera linea de playa',

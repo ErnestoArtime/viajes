@@ -58,7 +58,9 @@ incluir `SUPABASE_SERVICE_ROLE_KEY` en Angular, Vercel ni el repositorio.
 
 La base de datos parte de la migracion versionada en
 `supabase/migrations/202607130001_initial_schema.sql`. Aplicala con la CLI de
-Supabase contra cada proyecto antes de habilitar el portal. Incluye RLS para
+Supabase contra cada proyecto antes de habilitar el portal. `supabase/seed.sql`
+crea exclusivamente el catálogo demo de desarrollo, con los mismos UUID que usa
+el frontend; no debe aplicarse a producción. La migración incluye RLS para
 catalogo publicado, viajeros, operadores y administradores; los roles solo se
 asignan desde un contexto administrativo de servidor.
 
