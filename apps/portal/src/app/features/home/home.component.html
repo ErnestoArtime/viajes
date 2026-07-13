@@ -1,199 +1,49 @@
 <ion-content fullscreen="true">
-  <main class="shell">
+  <main>
     <section class="hero-section">
-      <div class="hero-copy">
-        <ion-badge color="secondary">Producto multi-cliente para turismo</ion-badge>
-        <h1>Reserva y vende alojamientos, servicios y experiencias en Cuba.</h1>
-        <p>
-          Una base Ionic Angular preparada para web, PWA, Android e iOS, con catalogo
-          comercial, gestion por operadores y arquitectura lista para conectar Supabase.
-        </p>
-        <div class="hero-actions">
-          <ion-button size="large" color="primary" href="#catalogo">
-            <ion-icon slot="start" name="search-outline"></ion-icon>
-            Explorar inventario
-          </ion-button>
-          <ion-button size="large" fill="outline" color="tertiary" href="#gestion">
-            <ion-icon slot="start" name="construct-outline"></ion-icon>
-            Ver gestion
-          </ion-button>
+      <div class="shell hero-copy">
+        <span class="eyebrow light">Cuba, sin itinerarios prestados</span>
+        <h1>Descubre Cuba a tu manera.</h1>
+        <p>Alojamientos con encanto, experiencias locales y traslados para que tu viaje se sienta realmente tuyo.</p>
+        <div class="search-bar" aria-label="Buscar una estancia o experiencia">
+          <label><span>Destino</span><input [(ngModel)]="destination" placeholder="La Habana, Vinales, Trinidad"></label>
+          <label><span>Viajeros</span><input [(ngModel)]="guests" min="1" max="8" type="number"></label>
+          <ion-button color="secondary" [routerLink]="['/buscar']" [queryParams]="{ destination, guests }"><ion-icon name="search-outline" slot="start"></ion-icon>Buscar</ion-button>
         </div>
       </div>
-
-      <aside class="booking-panel" aria-label="Busqueda de disponibilidad">
-        <div class="panel-heading">
-          <span>Busqueda rapida</span>
-          <ion-chip color="primary">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <ion-label>Junio 2026</ion-label>
-          </ion-chip>
-        </div>
-
-        <label>
-          Destino o servicio
-          <input [(ngModel)]="searchTerm" type="search" placeholder="Habana, hostal, playa...">
-        </label>
-
-        <div class="field-grid">
-          <label>
-            Provincia
-            <select [(ngModel)]="province">
-              @for (item of provinces; track item) {
-                <option [value]="item">{{ item }}</option>
-              }
-            </select>
-          </label>
-          <label>
-            Personas
-            <input [(ngModel)]="guests" min="1" max="8" type="number">
-          </label>
-        </div>
-
-        <div class="availability-card">
-          <ion-icon name="checkmark-circle-outline"></ion-icon>
-          <div>
-            <strong>{{ filteredListings().length }} opciones disponibles</strong>
-            <span>Con tarifas, cupos y gestores preparados para reserva.</span>
-          </div>
-        </div>
-      </aside>
     </section>
 
-    <section class="metric-strip" aria-label="Indicadores comerciales">
-      @for (metric of metrics; track metric.label) {
-        <article>
-          <span>{{ metric.label }}</span>
-          <strong>{{ metric.value }}</strong>
-          <small>{{ metric.trend }}</small>
-        </article>
-      }
+    <section class="shell explore-grid section-block">
+      <div class="section-heading"><div><span class="eyebrow">Explora a tu manera</span><h2>Todo lo que necesitas para vivir Cuba.</h2></div></div>
+      <a routerLink="/buscar" class="explore-card stays"><span>Alojamientos</span><strong>Espacios que invitan a quedarte.</strong><ion-icon name="chevron-forward-outline"></ion-icon></a>
+      <a routerLink="/experiencias" class="explore-card experiences"><span>Experiencias</span><strong>Historias que no caben en una foto.</strong><ion-icon name="compass-outline"></ion-icon></a>
+      <a routerLink="/transporte" class="explore-card rides"><span>Traslados</span><strong>Muévete de un destino a otro.</strong><ion-icon name="location-outline"></ion-icon></a>
     </section>
 
-    <section id="catalogo" class="section-block">
-      <div class="section-heading">
-        <div>
-          <span class="eyebrow">Catalogo vendible</span>
-          <h2>Inventario inicial para hoteles, hostales y servicios.</h2>
-        </div>
-        <ion-segment [value]="selectedCategory()" (ionChange)="updateCategory($event.detail.value)">
-          @for (category of categories; track category) {
-            <ion-segment-button [value]="category">
-              <ion-label>{{ categoryLabels[category] }}</ion-label>
-            </ion-segment-button>
-          }
-        </ion-segment>
-      </div>
-
+    <section class="shell section-block">
+      <div class="section-heading"><div><span class="eyebrow">Escapadas para reservar</span><h2>Quédate donde empieza la historia.</h2></div><ion-button fill="clear" routerLink="/buscar">Ver todo <ion-icon name="chevron-forward-outline" slot="end"></ion-icon></ion-button></div>
       <div class="listing-grid">
-        @for (listing of filteredListings(); track trackListing($index, listing)) {
+        @for (listing of listings; track listing.id) {
           <article class="listing-card">
-            <img [src]="listing.imageUrl" [alt]="listing.name">
+            <a [routerLink]="['/oferta', listing.slug ?? listing.id]"><img [src]="listing.imageUrl" [alt]="listing.name" loading="lazy"></a>
             <div class="listing-body">
-              <div class="listing-meta">
-                <ion-badge>{{ categoryLabels[listing.category] }}</ion-badge>
-                <span><ion-icon name="star"></ion-icon>{{ listing.rating }} ({{ listing.reviewCount }})</span>
-              </div>
-              <h3>{{ listing.name }}</h3>
-              <p>{{ listing.shortDescription }}</p>
-              <div class="location">
-                <ion-icon name="location-outline"></ion-icon>
-                {{ listing.location }}, {{ listing.province }}
-              </div>
-              <div class="tag-row">
-                @for (tag of listing.tags; track tag) {
-                  <span>{{ tag }}</span>
-                }
-              </div>
-              <div class="listing-footer">
-                <div>
-                  <strong>{{ listing.nightlyPrice }} {{ listing.currency }}</strong>
-                  <small>por noche</small>
-                </div>
-                <ion-button fill="clear" color="primary">
-                  Reservar
-                  <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
-                </ion-button>
-              </div>
+              <div class="listing-meta"><span>{{ listing.category }}</span><span><ion-icon name="star"></ion-icon>{{ listing.rating }} · {{ listing.reviewCount }}</span></div>
+              <a [routerLink]="['/oferta', listing.slug ?? listing.id]"><h3>{{ listing.name }}</h3></a>
+              <p>{{ listing.location }}, {{ listing.province }}</p>
+              <div class="price"><strong>Desde {{ listing.nightlyPrice }} {{ listing.currency }}</strong><span>por noche</span></div>
             </div>
           </article>
-        } @empty {
-          <div class="empty-state">
-            <ion-icon name="search-outline"></ion-icon>
-            <strong>No hay resultados con esos filtros.</strong>
-            <span>Ajusta provincia, categoria o cantidad de personas.</span>
-          </div>
         }
       </div>
     </section>
 
-    <section class="section-block package-band">
-      <div class="section-heading compact">
-        <div>
-          <span class="eyebrow">Comercializacion</span>
-          <h2>Paquetes y servicios que suben el ticket promedio.</h2>
-        </div>
-      </div>
-
+    <section class="shell section-block">
+      <div class="section-heading"><div><span class="eyebrow">Viajes completos</span><h2>Combina, guarda y disfruta.</h2></div></div>
       <div class="package-grid">
-        @for (item of packages; track item.id) {
-          <article class="package-card" [class]="'accent-' + item.accent">
-            <span>{{ item.duration }}</span>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
-            <ul>
-              @for (include of item.includes; track include) {
-                <li>
-                  <ion-icon name="checkmark-circle-outline"></ion-icon>
-                  {{ include }}
-                </li>
-              }
-            </ul>
-            <strong>Desde {{ item.priceFrom }} {{ item.currency }}</strong>
-          </article>
-        }
+        @for (item of packages; track item.id) { <article class="package-card"><span>{{ item.duration }}</span><h3>{{ item.title }}</h3><p>{{ item.description }}</p><strong>Desde {{ item.priceFrom }} {{ item.currency }}</strong></article> }
       </div>
     </section>
 
-    <section id="gestion" class="management-grid">
-      <div class="section-heading vertical">
-        <span class="eyebrow">Gestionable y personalizable</span>
-        <h2>Listo para vender como producto a gestores de turismo.</h2>
-        <p>
-          La capa de tenant permite cambiar marca, modulos, reglas comerciales y comisiones
-          sin tocar el nucleo del dominio. Supabase entrara como adaptador de datos.
-        </p>
-      </div>
-
-      <div class="ops-panel">
-        <article>
-          <ion-icon name="storefront-outline"></ion-icon>
-          <div>
-            <strong>Multi-tenant</strong>
-            <span>Marca, contacto, modulos y reglas por cliente.</span>
-          </div>
-        </article>
-        <article>
-          <ion-icon name="bed-outline"></ion-icon>
-          <div>
-            <strong>Inventario turistico</strong>
-            <span>Hoteles, hostales, villas, experiencias y transporte.</span>
-          </div>
-        </article>
-        <article>
-          <ion-icon name="analytics-outline"></ion-icon>
-          <div>
-            <strong>Panel operativo</strong>
-            <span>Ocupacion, ventas, disponibilidad, comisiones y vouchers.</span>
-          </div>
-        </article>
-        <article>
-          <ion-icon name="color-palette-outline"></ion-icon>
-          <div>
-            <strong>White label</strong>
-            <span>Colores, textos, dominios y catalogo por agencia o gestor.</span>
-          </div>
-        </article>
-      </div>
-    </section>
+    <section class="shell destination-banner"><div><span class="eyebrow">Planea con calma</span><h2>Destinos que se viven sin prisa.</h2><p>La Habana, Vinales, Trinidad, Varadero y mucho más.</p></div><ion-button routerLink="/destinos" color="secondary">Ver destinos</ion-button></section>
   </main>
 </ion-content>
