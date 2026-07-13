@@ -1,0 +1,23 @@
+<main class="operator-shell">
+  <section class="operator-hero">
+    <div><span class="eyebrow"><ion-icon name="analytics-outline"></ion-icon> Espacio de proveedor</span><h1>Gestiona tu operacion con claridad.</h1><p>Reservas, inventario y calendario de <strong>Viajes Cuba</strong> en un solo lugar.</p></div>
+    <div class="hero-actions"><span>{{ refreshedAt() }}</span><button class="refresh" type="button" (click)="refreshData()" aria-label="Actualizar datos"><ion-icon name="refresh-outline"></ion-icon></button><a class="product-link" routerLink="/operator/producto">Configurar producto <ion-icon name="arrow-forward-outline"></ion-icon></a></div>
+  </section>
+
+  @if (featureFlags().operatorDashboard.enabled) {
+    <nav class="operator-tabs" aria-label="Secciones del proveedor"><button type="button" [class.active]="activeTab() === 'metrics'" (click)="activeTab.set('metrics')">Resumen</button><button type="button" [class.active]="activeTab() === 'inventory'" (click)="activeTab.set('inventory')">Inventario</button><button type="button" [class.active]="activeTab() === 'calendar'" (click)="activeTab.set('calendar')">Calendario</button></nav>
+
+    @if (activeTab() === 'metrics') {
+      <section class="metrics-grid">@for (metric of metricsCards(); track metric.label) { <article class="metric-card" [class]="'metric-card ' + metric.tone"><ion-icon [name]="metric.icon"></ion-icon><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small>{{ metric.trend }}</small></article> }</section>
+      <section class="dashboard-grid"><article class="panel bookings-panel"><div class="panel-heading"><div><span class="eyebrow">Ritmo comercial</span><h2>Reservas de la semana</h2></div><span>306 reservas</span></div><div class="bars">@for (day of weeklyData(); track day.day) { <div><span>{{ day.count }}</span><i [style.height.%]="day.percentage"></i><small>{{ day.day }}</small></div> }</div></article><article class="panel"><div class="panel-heading"><div><span class="eyebrow">Destinos</span><h2>Los mas reservados</h2></div></div><div class="destination-list">@for (destination of topDestinations(); track destination.name) { <div><span>{{ destination.name }}</span><small>{{ destination.bookings }} reservas</small><strong [class.negative]="destination.trend < 0">{{ destination.trend > 0 ? '+' : '' }}{{ destination.trend }}%</strong></div> }</div></article></section>
+    }
+
+    @if (activeTab() === 'inventory' && featureFlags().operatorDashboard.inventoryManagement) {
+      <section class="panel inventory-panel"><div class="panel-heading"><div><span class="eyebrow">Catalogo activo</span><h2>Inventario y disponibilidad</h2></div><button class="add-button" type="button"><ion-icon name="add-outline"></ion-icon> Nueva ficha</button></div><div class="inventory-list">@for (item of inventoryItems(); track item.id) { <article><div><strong>{{ item.name }}</strong><span>{{ item.type }}</span></div><span class="status" [class]="'status ' + item.status">{{ statusLabel(item.status) }}</span><div class="occupancy"><span>{{ item.occupancy }}% ocupado</span><i><b [style.width.%]="item.occupancy"></b></i></div><small>{{ item.nextBooking ? 'Proxima reserva: ' + item.nextBooking : 'Sin reservas proximas' }}</small></article> }</div></section>
+    }
+
+    @if (activeTab() === 'calendar' && featureFlags().operatorDashboard.calendarView) {
+      <section class="panel calendar-panel"><div class="panel-heading"><div><span class="eyebrow">Planificacion</span><h2>{{ currentMonthYear() }}</h2></div><div class="month-controls"><button type="button" (click)="previousMonth()">Anterior</button><button type="button" (click)="nextMonth()">Siguiente</button></div></div><div class="calendar-grid"><span>Lun</span><span>Mar</span><span>Mie</span><span>Jue</span><span>Vie</span><span>Sab</span><span>Dom</span>@for (day of calendarDays(); track day.date.toISOString()) { <button type="button" [class.other-month]="!day.isCurrentMonth" [class.today]="day.isToday"><span>{{ day.date.getDate() }}</span>@if (day.bookings) { <small>{{ day.bookings }} reservas</small> }</button> }</div></section>
+    }
+  } @else { <section class="disabled-state"><ion-icon name="cube-outline"></ion-icon><h2>Panel operativo no incluido</h2><p>Activa el modulo de Operacion desde la configuracion comercial de este tenant.</p><a routerLink="/operator/producto">Ir a producto</a></section> }
+</main>
