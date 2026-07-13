@@ -1,0 +1,73 @@
+<main class="product-console">
+  <section class="console-hero">
+    <div>
+      <span class="eyebrow"><ion-icon name="cube-outline"></ion-icon> Producto white-label</span>
+      <h1>Configura lo que vendes y despliegas.</h1>
+      <p>Prepara una instancia para cada turoperador con su marca, paquete comercial y capacidades activadas sin cambiar el codigo de la aplicacion.</p>
+    </div>
+    <div class="tenant-chip">
+      <span class="tenant-dot" [style.background]="config().branding.primaryColor"></span>
+      <div><small>Tenant activo</small><strong>{{ config().branding.productName }}</strong></div>
+    </div>
+  </section>
+
+  <section class="summary-strip" aria-label="Resumen de producto">
+    <div><ion-icon name="layers-outline"></ion-icon><span>Plan</span><strong>{{ activePlan().name }}</strong></div>
+    <div><ion-icon name="settings-outline"></ion-icon><span>Modulos activos</span><strong>{{ enabledModuleCount() }}</strong></div>
+    <div><ion-icon name="rocket-outline"></ion-icon><span>Despliegues</span><strong>{{ config().deploymentTargets.length }}</strong></div>
+    <div class="price-summary"><span>Estimado mensual</span><strong>{{ estimatedMonthlyUsd() === 0 ? 'A medida' : 'Desde $' + estimatedMonthlyUsd() + ' USD' }}</strong></div>
+  </section>
+
+  <section class="section-head">
+    <div><span class="eyebrow">01. Paquete base</span><h2>Define la propuesta comercial</h2></div>
+    <p>El plan establece limites y los modulos incluidos. Los complementos se gestionan debajo como valor agregado.</p>
+  </section>
+  <div class="plan-grid">
+    @for (plan of plans; track plan.id) {
+      <button class="plan-card" [class.selected]="activePlan().id === plan.id" type="button" (click)="selectPlan(plan.id)">
+        <span class="plan-selection"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+        <h3>{{ plan.name }}</h3>
+        <p>{{ plan.description }}</p>
+        <strong>{{ plan.monthlyFromUsd === 0 ? 'Precio a medida' : 'Desde $' + plan.monthlyFromUsd + ' USD / mes' }}</strong>
+        <ul><li>{{ plan.limits.listings === 'unlimited' ? 'Catalogo sin limite' : plan.limits.listings + ' fichas de catalogo' }}</li><li>{{ plan.limits.teamMembers === 'unlimited' ? 'Equipo sin limite' : plan.limits.teamMembers + ' usuarios de equipo' }}</li></ul>
+      </button>
+    }
+  </div>
+
+  <section class="section-head modules-heading">
+    <div><span class="eyebrow">02. Modulos</span><h2>Convierte cada capacidad en un producto</h2></div>
+    <p>Los modulos incluidos no se pueden desactivar. Los complementos se reflejan en el perfil funcional de este tenant.</p>
+  </section>
+  <div class="module-grid">
+    @for (module of modules; track module.id) {
+      <article class="module-card" [class.enabled]="isEnabled(module.id)" [class.included]="isIncluded(module.id)">
+        <div class="module-top"><span class="module-category">{{ module.category }}</span><label class="switch"><input type="checkbox" [checked]="isEnabled(module.id)" [disabled]="isIncluded(module.id)" (change)="toggleModule(module.id)"><span></span></label></div>
+        <h3>{{ module.name }}</h3><p>{{ module.description }}</p>
+        <footer><span>{{ module.deploymentImpact }}</span><strong>{{ isIncluded(module.id) ? 'Incluido' : '+ $' + module.monthlyAddOnUsd + ' USD/mes' }}</strong></footer>
+      </article>
+    }
+  </div>
+
+  <section class="configuration-grid">
+    <div class="config-panel">
+      <div class="section-head compact"><div><span class="eyebrow">03. Marca</span><h2>Identidad por cliente</h2></div></div>
+      <div class="form-grid">
+        <label>Nombre comercial<input [ngModel]="config().branding.productName" (ngModelChange)="updateProductName($event)" /></label>
+        <label>Correo de soporte<input type="email" [ngModel]="config().branding.contactEmail" (ngModelChange)="updateContact($event)" /></label>
+        <label class="wide">Mercado o propuesta<input [ngModel]="config().branding.market" (ngModelChange)="updateMarket($event)" /></label>
+        <label>Color principal<span class="color-input"><input type="color" [ngModel]="config().branding.primaryColor" (ngModelChange)="updatePrimaryColor($event)" /><code>{{ config().branding.primaryColor }}</code></span></label>
+        <label>Color de acento<span class="color-input"><input type="color" [ngModel]="config().branding.accentColor" (ngModelChange)="updateAccentColor($event)" /><code>{{ config().branding.accentColor }}</code></span></label>
+      </div>
+    </div>
+    <aside class="deployment-panel">
+      <span class="eyebrow">04. Despliegue</span><h2>Canales habilitados</h2><p>El mismo perfil funcional acompana cada destino de compilacion.</p>
+      <div class="target-list">
+        <button type="button" [class.active]="targetEnabled('web')" (click)="toggleTarget('web')"><ion-icon name="globe-outline"></ion-icon><span>Web publica</span><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+        <button type="button" [class.active]="targetEnabled('pwa')" (click)="toggleTarget('pwa')"><ion-icon name="storefront-outline"></ion-icon><span>PWA viajero</span><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+        <button type="button" [class.active]="targetEnabled('android')" (click)="toggleTarget('android')"><ion-icon name="phone-portrait-outline"></ion-icon><span>Android</span><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+        <button type="button" [class.active]="targetEnabled('ios')" (click)="toggleTarget('ios')"><ion-icon name="phone-portrait-outline"></ion-icon><span>iOS</span><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+      </div>
+      <button class="reset-button" type="button" (click)="reset()">Restaurar configuracion de demostracion</button>
+    </aside>
+  </section>
+</main>
