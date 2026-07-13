@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonButton,
   IonCard,
@@ -31,6 +32,9 @@ import {
   checkmarkCircleOutline
 } from 'ionicons/icons';
 import { FeatureFlagsService } from '@viajes/tenant-config';
+import { UserRole } from '@viajes/supabase-adapter';
+
+import { AuthService } from '../../core/services/auth.service';
 
 interface User {
   id: string;
@@ -38,7 +42,7 @@ interface User {
   name: string;
   phone?: string;
   verified: boolean;
-  role: 'guest' | 'host' | 'admin';
+  role: UserRole;
 }
 
 interface AuthState {
@@ -418,15 +422,30 @@ interface AuthState {
 })
 export class AuthComponent {
   private readonly featureFlagsService = inject(FeatureFlagsService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   
   protected readonly featureFlags = this.featureFlagsService.flags;
   protected readonly authMode = signal<'login' | 'register'>('login');
 
-  protected readonly authState = signal<AuthState>({
-    isAuthenticated: false,
-    user: null,
-    loading: false,
-    error: null
+  private readonly errorState = signal<string | null>(null);
+  protected readonly authState = computed<AuthState>(() => {
+    const profile = this.authService.profile();
+    return {
+      isAuthenticated: this.authService.isAuthenticated(),
+      user: profile
+        ? {
+            id: profile.id,
+            email: profile.email,
+            name: profile.fullName ?? profile.email,
+            verified: true,
+            role: profile.role
+          }
+        : null,
+      loading: this.authService.loading(),
+      error: this.errorState()
+    };
   });
 
   protected loginEmail = '';
@@ -451,84 +470,73 @@ export class AuthComponent {
   updateAuthMode(value: string | number | undefined): void {
     if (value === 'login' || value === 'register') {
       this.authMode.set(value);
-      this.authState.update(state => ({ ...state, error: null }));
+      this.errorState.set(null);
     }
   }
 
-  login(): void {
-    this.authState.update(state => ({ ...state, loading: true, error: null }));
+  async login(): Promise<void> {
+    if (!this.loginEmail || !this.loginPassword) {
+      this.errorState.set('Ingresa email y contrasena.');
+      return;
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      if (this.loginEmail && this.loginPassword) {
-        this.authState.set({
-          isAuthenticated: true,
-          user: {
-            id: '1',
-            email: this.loginEmail,
-            name: 'Usuario Demo',
-            verified: true,
-            role: 'guest'
-          },
-          loading: false,
-          error: null
-        });
-      } else {
-        this.authState.update(state => ({
-          ...state,
-          loading: false,
-          error: 'Por favor ingresa email y contrasena'
-        }));
-      }
-    }, 1500);
+    this.errorState.set(null);
+    try {
+      await this.authService.signIn(this.loginEmail, this.loginPassword);
+      await this.navigateAfterAuthentication();
+    } catch (error) {
+      this.errorState.set(error instanceof Error ? error.message : 'No se pudo iniciar sesion.');
+    }
   }
 
   loginWithOTP(): void {
-    alert('Funcionalidad de OTP en desarrollo');
+    this.errorState.set('El acceso por codigo no esta configurado para este entorno.');
   }
 
-  register(): void {
-    if (this.registerName && this.registerEmail) {
-      this.authState.set({
-        isAuthenticated: true,
-        user: {
-          id: '2',
-          email: this.registerEmail,
-          name: this.registerName,
-          phone: this.registerPhone || undefined,
-          verified: false,
-          role: 'guest'
-        },
-        loading: false,
-        error: null
-      });
+  async register(): Promise<void> {
+    if (!this.registerName || !this.registerEmail || !this.registerPassword) {
+      this.errorState.set('Completa nombre, email y contrasena.');
+      return;
+    }
+
+    this.errorState.set(null);
+    try {
+      await this.authService.signUp(this.registerEmail, this.registerPassword, this.registerName);
+      this.errorState.set('Revisa tu correo para confirmar la cuenta antes de iniciar sesion.');
+      this.authMode.set('login');
+    } catch (error) {
+      this.errorState.set(error instanceof Error ? error.message : 'No se pudo crear la cuenta.');
     }
   }
 
-  logout(): void {
-    this.authState.set({
-      isAuthenticated: false,
-      user: null,
-      loading: false,
-      error: null
-    });
+  async logout(): Promise<void> {
+    try {
+      await this.authService.signOut();
+    } catch (error) {
+      this.errorState.set(error instanceof Error ? error.message : 'No se pudo cerrar sesion.');
+    }
   }
 
   getRoleColor(role: string | undefined): string {
     const colors: Record<string, string> = {
-      guest: 'primary',
-      host: 'secondary',
+      traveler: 'primary',
+      operator: 'secondary',
       admin: 'danger'
     };
-    return colors[role || 'guest'] || 'primary';
+    return colors[role || 'traveler'] || 'primary';
   }
 
   getRoleLabel(role: string | undefined): string {
     const labels: Record<string, string> = {
-      guest: 'Viajero',
-      host: 'Anfitrion',
+      traveler: 'Viajero',
+      operator: 'Operador',
       admin: 'Administrador'
     };
-    return labels[role || 'guest'] || 'Viajero';
+    return labels[role || 'traveler'] || 'Viajero';
+  }
+
+  private async navigateAfterAuthentication(): Promise<void> {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    await this.router.navigateByUrl(returnUrl && returnUrl.startsWith('/') ? returnUrl : '/home');
   }
 }
