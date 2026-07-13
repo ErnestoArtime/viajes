@@ -1,0 +1,106 @@
+[
+  {
+    "sourceName": "osm",
+    "label": "OpenStreetMap",
+    "url": "https://www.openstreetmap.org",
+    "priority": "high",
+    "usage": "open-data",
+    "recommendedFor": ["coordinates", "address", "municipality", "accommodation type"]
+  },
+  {
+    "sourceName": "wikidata",
+    "label": "Wikidata",
+    "url": "https://www.wikidata.org",
+    "priority": "high",
+    "usage": "open-data",
+    "recommendedFor": ["structured identifiers", "coordinates", "alternate names"]
+  },
+  {
+    "sourceName": "wikimedia",
+    "label": "Wikimedia Commons",
+    "url": "https://commons.wikimedia.org",
+    "priority": "high",
+    "usage": "open-data",
+    "recommendedFor": ["image candidates", "author attribution", "license metadata"]
+  },
+  {
+    "sourceName": "cubatravel",
+    "label": "CubaTravel",
+    "url": "https://www.cubatravel.cu",
+    "priority": "high",
+    "usage": "reference",
+    "recommendedFor": ["destinations", "province structure", "tourism categories"]
+  },
+  {
+    "sourceName": "gaviota",
+    "label": "Gaviota Hotels",
+    "url": "https://www.gaviotahotels.com",
+    "priority": "high",
+    "usage": "reference",
+    "recommendedFor": ["hotel inventory", "destinations", "operator data"]
+  },
+  {
+    "sourceName": "melia",
+    "label": "Melia Cuba",
+    "url": "https://www.meliacuba.com",
+    "priority": "high",
+    "usage": "reference",
+    "recommendedFor": ["brand data", "hotel names", "destinations"]
+  },
+  {
+    "sourceName": "iberostar",
+    "label": "Iberostar Cuba",
+    "url": "https://www.iberostar.com/en/hotels/cuba/",
+    "priority": "high",
+    "usage": "reference",
+    "recommendedFor": ["brand data", "hotel names", "destinations"]
+  },
+  {
+    "sourceName": "solways",
+    "label": "Solways Cuba",
+    "url": "https://www.solwayscuba.com",
+    "priority": "medium",
+    "usage": "reference",
+    "recommendedFor": ["hotel inventory", "destinations", "packages"]
+  },
+  {
+    "sourceName": "travelnet-cuba",
+    "label": "Travelnet Cuba",
+    "url": "https://www.travelnetcuba.com",
+    "priority": "medium",
+    "usage": "reference",
+    "recommendedFor": ["hotel inventory", "destinations", "name matching"]
+  },
+  {
+    "sourceName": "gran-caribe",
+    "label": "Gran Caribe",
+    "url": "https://www.gran-caribe.com",
+    "priority": "medium",
+    "usage": "reference",
+    "recommendedFor": ["hotel inventory", "operator data", "destinations"]
+  },
+  {
+    "sourceName": "havanatursa",
+    "label": "Havanatursa",
+    "url": "https://www.havanatursa.com/home/hotel",
+    "priority": "low",
+    "usage": "reference",
+    "recommendedFor": ["manual review", "visual reference"]
+  },
+  {
+    "sourceName": "cubatur",
+    "label": "Cubatur",
+    "url": "https://www.cubatur.com",
+    "priority": "low",
+    "usage": "reference",
+    "recommendedFor": ["manual review", "agency reference"]
+  },
+  {
+    "sourceName": "tripadvisor",
+    "label": "Tripadvisor",
+    "url": "https://www.tripadvisor.com/Hotels-g147270-Cuba-Hotels.html",
+    "priority": "low",
+    "usage": "reference",
+    "recommendedFor": ["manual popularity validation", "review volume signals"]
+  }
+]

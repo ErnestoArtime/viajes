@@ -24,6 +24,21 @@ Fuente externa
   -> Supabase / portal
 ```
 
-Fuentes recomendadas para datos iniciales: carga manual, acuerdos con proveedores,
-OpenStreetMap para ubicacion factual con atribucion, Wikimedia Commons revisando
-licencia de cada archivo, y fotos propias o placeholders para pruebas.
+## Orden recomendado
+
+1. OpenStreetMap + Wikidata para nombres, coordenadas y datos factuales.
+2. CubaTravel para estructura de destinos/provincias.
+3. Gaviota, Melia, Iberostar, Solways, Travelnet Cuba y Gran Caribe para cruzar inventario.
+4. Wikimedia Commons, fotos propias o placeholders para imagenes.
+5. Tripadvisor, Booking, Google y sitios similares solo como referencia manual.
+
+El catalogo de fuentes inicial esta en `sources.catalog.json`.
+
+## Estados obligatorios
+
+- `status`: `draft`, `needs_review`, `approved`, `rejected`
+- `operationalStatus`: `active`, `temporarily_closed`, `unknown`, `legacy`
+- `licenseStatus`: `unknown`, `allowed`, `needs_permission`, `open_license`, `demo_only`
+
+Cada registro importado debe conservar `lastCheckedAt`. Esto importa porque la gestion
+hotelera en Cuba cambia y una ficha puede quedar como historica o temporalmente cerrada.
