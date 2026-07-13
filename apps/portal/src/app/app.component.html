@@ -1,123 +1,35 @@
 <ion-app>
-  <ion-menu contentId="main-content">
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>{{ tenant.productName }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
+  <ion-menu contentId="main-content" type="overlay" class="travel-menu">
     <ion-content>
-      <ion-list>
-        <ion-item button routerLink="/home" detail>
-          <ion-icon name="home-outline" slot="start"></ion-icon>
-          <ion-label>Inicio</ion-label>
-        </ion-item>
-
-        <ion-item-divider>
-          <ion-label>Funcionalidades</ion-label>
-        </ion-item-divider>
-
-        @if (features().booking.enabled) {
-          <ion-item button routerLink="/features/booking" detail>
-            <ion-icon name="cart-outline" slot="start"></ion-icon>
-            <ion-label>Reservas y Pagos</ion-label>
-          </ion-item>
-        }
-
-        @if (features().operatorDashboard.enabled) {
-          <ion-item button routerLink="/features/dashboard" detail>
-            <ion-icon name="analytics-outline" slot="start"></ion-icon>
-            <ion-label>Panel Operativo</ion-label>
-          </ion-item>
-        }
-
-        @if (features().travelerExperience.enabled) {
-          <ion-item button routerLink="/features/experience" detail>
-            <ion-icon name="compass-outline" slot="start"></ion-icon>
-            <ion-label>Experiencias</ion-label>
-          </ion-item>
-        }
-
-        @if (features().multiLanguage.enabled || features().multiCurrency.enabled) {
-          <ion-item button routerLink="/features/localization" detail>
-            <ion-icon name="globe-outline" slot="start"></ion-icon>
-            <ion-label>Multi-idioma/Moneda</ion-label>
-          </ion-item>
-        }
-
-        @if (features().loyalty.enabled) {
-          <ion-item button routerLink="/features/loyalty" detail>
-            <ion-icon name="trophy-outline" slot="start"></ion-icon>
-            <ion-label>Fidelizacion</ion-label>
-          </ion-item>
-        }
-
-        @if (features().integrations.googleMaps || features().integrations.whatsappBusiness || features().integrations.googleAnalytics || features().integrations.pushNotifications) {
-          <ion-item button routerLink="/features/integrations" detail>
-            <ion-icon name="settings-outline" slot="start"></ion-icon>
-            <ion-label>Integraciones</ion-label>
-          </ion-item>
-        }
-
-        @if (features().auth.enabled) {
-          <ion-item button routerLink="/features/auth" detail>
-            <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
-            <ion-label>Autenticacion</ion-label>
-          </ion-item>
-        }
-
-        @if (features().transport.enabled) {
-          <ion-item button routerLink="/features/transport" detail>
-            <ion-icon name="car-outline" slot="start"></ion-icon>
-            <ion-label>Transporte</ion-label>
-          </ion-item>
-        }
-
-        @if (features().content.enabled) {
-          <ion-item button routerLink="/features/content" detail>
-            <ion-icon name="document-text-outline" slot="start"></ion-icon>
-            <ion-label>Contenido</ion-label>
-          </ion-item>
-        }
-
-        @if (features().analytics.enabled) {
-          <ion-item button routerLink="/features/analytics" detail>
-            <ion-icon name="pulse-outline" slot="start"></ion-icon>
-            <ion-label>Analytics</ion-label>
-          </ion-item>
-        }
-
-        <ion-item-divider>
-          <ion-label>Administracion</ion-label>
-        </ion-item-divider>
-
-        <ion-item button routerLink="/admin/features" detail>
-          <ion-icon name="settings-outline" slot="start"></ion-icon>
-          <ion-label>Gestionar Funcionalidades</ion-label>
-        </ion-item>
-      </ion-list>
+      <div class="menu-brand"><span class="brand-mark" [style.background]="tenant().branding.primaryColor">VC</span><div><strong>{{ tenant().branding.productName }}</strong><span>Tu viaje por Cuba</span></div></div>
+      <nav aria-label="Navegacion principal">
+        <span class="menu-label">Descubrir</span>
+        <ion-item button routerLink="/" detail="false"><ion-icon name="home-outline" slot="start"></ion-icon><ion-label><strong>Inicio</strong><span>Inspirate y planifica</span></ion-label></ion-item>
+        <ion-item button routerLink="/buscar" detail="false"><ion-icon name="search-outline" slot="start"></ion-icon><ion-label><strong>Buscar</strong><span>Alojamientos y servicios</span></ion-label></ion-item>
+        <ion-item button routerLink="/destinos" detail="false"><ion-icon name="map-outline" slot="start"></ion-icon><ion-label><strong>Destinos</strong><span>Lugares para vivir</span></ion-label></ion-item>
+        <ion-item button routerLink="/experiencias" detail="false"><ion-icon name="compass-outline" slot="start"></ion-icon><ion-label><strong>Experiencias</strong><span>Momentos locales</span></ion-label></ion-item>
+        <span class="menu-label">Tu viaje</span>
+        <ion-item button routerLink="/viajes" detail="false"><ion-icon name="heart-outline" slot="start"></ion-icon><ion-label><strong>Guardados y viajes</strong><span>Favoritos, carrito e itinerario</span></ion-label></ion-item>
+      </nav>
+      <a class="provider-callout" routerLink="/operator"><span>Eres proveedor?</span><strong>Gestiona tu inventario</strong><ion-icon name="arrow-forward-outline"></ion-icon></a>
     </ion-content>
   </ion-menu>
 
   <div class="ion-page" id="main-content">
     <ion-header class="app-header">
       <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
-        <ion-title>
-          <span class="brand-mark">VC</span>
-          <span>{{ tenant.productName }}</span>
-        </ion-title>
-        <ion-buttons slot="end">
-          <ion-button fill="clear" routerLink="/home" fragment="catalogo">Catalogo</ion-button>
-          <ion-button fill="clear" routerLink="/home" fragment="gestion">Gestion</ion-button>
-          <ion-button color="secondary" fill="solid" href="mailto:{{ tenant.contactEmail }}">
-            Comercializar
-          </ion-button>
-        </ion-buttons>
+        <div class="header-content">
+          <ion-buttons class="mobile-menu-toggle"><ion-menu-button aria-label="Abrir menu"></ion-menu-button></ion-buttons>
+          <a class="brand" routerLink="/"><span class="brand-mark" [style.background]="tenant().branding.primaryColor">VC</span><span>{{ tenant().branding.productName }}</span></a>
+          <nav class="desktop-nav" aria-label="Navegacion principal"><a routerLink="/destinos">Destinos</a><a routerLink="/buscar">Alojamientos</a><a routerLink="/experiencias">Experiencias</a><a routerLink="/transporte">Traslados</a></nav>
+          <div class="header-actions">
+            <ion-button class="icon-action" routerLink="/viajes" aria-label="Mis viajes"><ion-icon name="heart-outline"></ion-icon></ion-button>
+            <ion-button class="icon-action" routerLink="/viajes" aria-label="Carrito"><ion-icon name="bag-outline"></ion-icon><span class="cart-count">{{ travelStore.cartCount() }}</span></ion-button>
+            <ion-button class="provider-button" color="secondary" fill="solid" routerLink="/operator">Soy proveedor</ion-button>
+          </div>
+        </div>
       </ion-toolbar>
     </ion-header>
-
     <ion-router-outlet></ion-router-outlet>
   </div>
 </ion-app>
