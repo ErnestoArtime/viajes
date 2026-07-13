@@ -5,49 +5,67 @@ import { featureEnabledGuard } from './core/guards/feature-enabled.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
-    pathMatch: 'full'
-  },
-  {
-    path: 'home',
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
   },
   {
-    path: 'admin/features',
+    path: 'home',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+  {
+    path: 'buscar',
+    loadComponent: () => import('./features/search/search.component').then(m => m.SearchComponent)
+  },
+  {
+    path: 'destinos',
+    loadComponent: () => import('./features/destinations/destinations.component').then(m => m.DestinationsComponent)
+  },
+  {
+    path: 'oferta/:id',
+    loadComponent: () => import('./features/listing-detail/listing-detail.component').then(m => m.ListingDetailComponent)
+  },
+  {
+    path: 'operator/features',
     loadComponent: () => import('./admin/admin-features.component').then(m => m.AdminFeaturesComponent)
   },
   {
-    path: 'features/booking',
+    path: 'operator/producto',
+    loadComponent: () => import('./features/operator-product/operator-product.component').then(m => m.OperatorProductComponent)
+  },
+  {
+    path: 'operator/reservas',
     canMatch: [featureEnabledGuard],
     data: { feature: 'booking.enabled' },
     loadComponent: () => import('./features/booking/booking.component').then(m => m.BookingComponent)
   },
   {
-    path: 'features/dashboard',
+    path: 'operator',
     canMatch: [featureEnabledGuard],
     data: { feature: 'operatorDashboard.enabled' },
     loadComponent: () => import('./features/operator-dashboard/operator-dashboard.component').then(m => m.OperatorDashboardComponent)
   },
   {
-    path: 'features/experience',
+    path: 'experiencias',
     canMatch: [featureEnabledGuard],
     data: { feature: 'travelerExperience.enabled' },
     loadComponent: () => import('./features/traveler-experience/traveler-experience.component').then(m => m.TravelerExperienceComponent)
   },
   {
-    path: 'features/localization',
+    path: 'operator/localizacion',
     canMatch: [featureEnabledGuard],
     data: { anyFeature: ['multiLanguage.enabled', 'multiCurrency.enabled'] },
     loadComponent: () => import('./features/localization/localization.component').then(m => m.LocalizationComponent)
   },
   {
-    path: 'features/loyalty',
-    canMatch: [featureEnabledGuard],
-    data: { feature: 'loyalty.enabled' },
-    loadComponent: () => import('./features/loyalty/loyalty.component').then(m => m.LoyaltyComponent)
+    path: 'viajes',
+    loadComponent: () => import('./features/trips/trips.component').then(m => m.TripsComponent)
   },
   {
-    path: 'features/integrations',
+    path: 'checkout',
+    loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
+  },
+  {
+    path: 'operator/integraciones',
     canMatch: [featureEnabledGuard],
     data: {
       anyFeature: [
@@ -60,31 +78,31 @@ export const routes: Routes = [
     loadComponent: () => import('./features/integrations/integrations.component').then(m => m.IntegrationsComponent)
   },
   {
-    path: 'features/auth',
+    path: 'cuenta',
     canMatch: [featureEnabledGuard],
     data: { feature: 'auth.enabled' },
     loadComponent: () => import('./features/auth/auth.component').then(m => m.AuthComponent)
   },
   {
-    path: 'features/transport',
+    path: 'transporte',
     canMatch: [featureEnabledGuard],
     data: { feature: 'transport.enabled' },
     loadComponent: () => import('./features/transport/transport.component').then(m => m.TransportComponent)
   },
   {
-    path: 'features/content',
+    path: 'operator/contenido',
     canMatch: [featureEnabledGuard],
     data: { feature: 'content.enabled' },
     loadComponent: () => import('./features/content/content.component').then(m => m.ContentComponent)
   },
   {
-    path: 'features/analytics',
+    path: 'operator/analitica',
     canMatch: [featureEnabledGuard],
     data: { feature: 'analytics.enabled' },
     loadComponent: () => import('./features/analytics/analytics.component').then(m => m.AnalyticsComponent)
   },
   {
     path: '**',
-    redirectTo: 'home'
+    redirectTo: ''
   }
 ];
