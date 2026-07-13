@@ -20,7 +20,6 @@
           }
         ],
         "styles": [
-          "apps/portal/src/theme/variables.scss",
           "apps/portal/src/styles.scss"
         ]
       },
