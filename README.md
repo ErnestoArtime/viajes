@@ -1,7 +1,7 @@
 # Viajes Cuba
 
 Monorepo base para un producto de reservas y comercializacion turistica en Cuba.
-La primera app es un portal Ionic Angular preparado para web, PWA, Android e iOS.
+La primera app es un portal Ionic Angular preparado para web. La PWA y las aplicaciones móviles nativas todavía no están implementadas como entregables de producción.
 
 ## Stack
 
